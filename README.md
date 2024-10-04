@@ -20,3 +20,6 @@ To run this tool locally, you'll need the following:
 Necessary files for the project:
 - `index.html`: The main HTML file.
 - `diff.min.js`: The `jsdiff` JavaScript library for diff comparison.
+
+
+Demo https://truedeity.github.io/comparetext/
