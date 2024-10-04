@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text Diff UI with JSON Formatting</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    textarea {
+      width: 45%;
+      height: 300px;
+      font-family: monospace;
+      white-space: pre;
+    }
+
+    #result {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .result-column {
+      width: 45%;
+      background-color: #f9f9f9;
+      padding: 10px;
+      border: 1px solid #ccc;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .diff-insert {
+      background-color: lightgreen;
+    }
+
+    .diff-delete {
+      background-color: lightcoral;
+      text-decoration: line-through;
+    }
+
+    pre {
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Text Diff UI with JSON Formatting</h2>
+  <div class="container">
+    <textarea id="source" placeholder="Paste Source Text"></textarea>
+    <textarea id="target" placeholder="Paste Target Text"></textarea>
+  </div>
+  <button onclick="compareText()">Compare</button>
+
+  <div id="result">
+    <div class="result-column" id="source-result"></div>
+    <div class="result-column" id="target-result"></div>
+  </div>
+
+  <!-- Correct jsdiff CDN from jsdelivr -->
+  <script src="https://cdn.jsdelivr.net/npm/diff@4.0.2/dist/diff.min.js"></script>
+
+  <script>
+    // Default JSON with a small difference
+    const defaultSourceJson = {
+      "name": "John",
+      "age": 30,
+      "city": "New York",
+      "isStudent": false
+    };
+
+    const defaultTargetJson = {
+      "name": "John",
+      "age": 30,
+      "city": "New York",
+      "isStudent": true // Changed from false to true
+    };
+
+    // Pre-fill the textareas with the default JSON
+    document.getElementById('source').value = JSON.stringify(defaultSourceJson, null, 2);
+    document.getElementById('target').value = JSON.stringify(defaultTargetJson, null, 2);
+
+    // Function to format JSON if valid
+    function tryFormatJson(textarea) {
+      try {
+        const json = JSON.parse(textarea.value);
+        textarea.value = JSON.stringify(json, null, 2); // 2 spaces for indentation
+      } catch (e) {
+        // Not valid JSON, do nothing
+      }
+    }
+
+    // Add event listeners for both textareas to handle input and format JSON
+    document.getElementById('source').addEventListener('input', function() {
+      tryFormatJson(this);
+    });
+    document.getElementById('target').addEventListener('input', function() {
+      tryFormatJson(this);
+    });
+
+    function compareText() {
+      const source = document.getElementById('source').value;
+      const target = document.getElementById('target').value;
+
+      const diff = Diff.diffWords(source, target);
+      const sourceResultDiv = document.getElementById('source-result');
+      const targetResultDiv = document.getElementById('target-result');
+
+      sourceResultDiv.innerHTML = '';
+      targetResultDiv.innerHTML = '';
+
+      const sourcePre = document.createElement('pre');
+      const targetPre = document.createElement('pre');
+
+      diff.forEach(part => {
+        const sourcePart = document.createElement('span');
+        const targetPart = document.createElement('span');
+
+        if (part.added) {
+          targetPart.classList.add('diff-insert');
+          targetPart.textContent = part.value;
+        } else if (part.removed) {
+          sourcePart.classList.add('diff-delete');
+          sourcePart.textContent = part.value;
+        } else {
+          sourcePart.textContent = part.value;
+          targetPart.textContent = part.value;
+        }
+
+        sourcePre.appendChild(sourcePart);
+        targetPre.appendChild(targetPart);
+      });
+
+      sourceResultDiv.appendChild(sourcePre);
+      targetResultDiv.appendChild(targetPre);
+    }
+  </script>
+</body>
+</html>
